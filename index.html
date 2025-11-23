@@ -237,15 +237,12 @@
   </main>
 
   <!-- FIREBASE & APP SCRIPT -->
-  <!-- Firebase compat SDK (v9) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 
   <script>
-    // =========================
     // 1. Firebase Config
-    // =========================
     const firebaseConfig = {
       apiKey: "AIzaSyCV5skKQO1i-T6pOckTEyhDG8H4fh7vS7s",
       authDomain: "sistem-pinjaman-aset-ict-v2.firebaseapp.com",
@@ -260,9 +257,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // =========================
-    // 2. Data Sedia Ada (Seed)
-    // =========================
+    // 2. Seed data aset
     const defaultAssets = {
       joi_chromebook_c100: {
         name: "LAPTOP JOI CHROMEBOOK C100",
@@ -391,9 +386,7 @@
       renderLoans();
     });
 
-    // =========================
-    // 3. Helper spesifikasi
-    // =========================
+    // Helper spesifikasi
     function textareaToSpecs(text) {
       const specs = {};
       text.split("\n").forEach(line => {
@@ -402,9 +395,7 @@
         const parts = trimmed.split(":");
         const key = parts.shift();
         const value = parts.join(":").trim();
-        if (key && value) {
-          specs[key.trim()] = value;
-        }
+        if (key && value) specs[key.trim()] = value;
       });
       return specs;
     }
@@ -416,9 +407,7 @@
         .join("\n");
     }
 
-    // =========================
-    // 4. UI: Tabs
-    // =========================
+    // Tabs
     const tabButtons = document.querySelectorAll("[data-page]");
     const sections = {
       "permohonan": document.getElementById("page-permohonan"),
@@ -442,9 +431,7 @@
       btn.addEventListener("click", () => showPage(btn.dataset.page));
     });
 
-    // =========================
-    // 5. Render Aset
-    // =========================
+    // Render aset
     function renderAssets() {
       const choiceList = document.getElementById("assetChoiceList");
       const availList = document.getElementById("assetAvailableList");
@@ -456,7 +443,7 @@
         const total = asset.total ?? available;
         const current = selectedQuantities[id] || 0;
 
-        // --- Card untuk Permohonan (dengan kuantiti) ---
+        // kad pilih aset
         const cardChoice = document.createElement("div");
         cardChoice.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex gap-4";
         cardChoice.innerHTML = `
@@ -505,7 +492,7 @@
         `;
         choiceList.appendChild(cardChoice);
 
-        // --- Card untuk Aset Tersedia (tanpa kuantiti) ---
+        // kad aset tersedia
         const cardAvail = document.createElement("div");
         cardAvail.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex flex-col gap-3";
         cardAvail.innerHTML = `
@@ -562,7 +549,6 @@
       `).join("");
     }
 
-    // Untuk dipanggil dari HTML (inline onclick)
     function changeAssetQuantity(id, delta, maxAvailable) {
       const oldVal = selectedQuantities[id] || 0;
       let newVal = oldVal + delta;
@@ -572,7 +558,7 @@
       const input = document.getElementById("qty-" + id);
       if (input) input.value = newVal;
     }
-    window.changeAssetQuantity = changeAssetQuantity; // expose global
+    window.changeAssetQuantity = changeAssetQuantity;
 
     function toggleSpec(id) {
       const el = document.getElementById(id);
@@ -581,9 +567,7 @@
     }
     window.toggleSpec = toggleSpec;
 
-    // =========================
-    // 6. Hantar Permohonan
-    // =========================
+    // Hantar permohonan
     document.getElementById("loanForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -619,7 +603,6 @@
         return;
       }
 
-      // Semak stok
       for (const [id, item] of Object.entries(selectedItems)) {
         const asset = assetsCache[id];
         const available = asset.available ?? 0;
@@ -642,15 +625,13 @@
         endDate: tarikhPulang,
         purpose: tujuan,
         items: selectedItems,
-        status: "Diluluskan",   // untuk versi mudah: terus lulus
+        status: "Diluluskan",
         isReturned: false,
         createdAt: new Date().toISOString()
       };
 
       const updates = {};
       updates["loans/" + loanId] = loanData;
-
-      // Kemaskini stok aset
       Object.entries(selectedItems).forEach(([id, item]) => {
         const asset = assetsCache[id];
         const available = asset.available ?? 0;
@@ -660,7 +641,6 @@
       db.ref().update(updates)
         .then(() => {
           alert("Permohonan dihantar & diluluskan.");
-          // reset form & pilihan
           document.getElementById("loanForm").reset();
           selectedQuantities = {};
           renderAssets();
@@ -672,9 +652,7 @@
         });
     });
 
-    // =========================
-    // 7. Render Loans
-    // =========================
+    // Render loans (BUG fixed: noActive hanya sekali)
     function renderLoans() {
       const activeList = document.getElementById("loanActiveList");
       const recordBody = document.getElementById("loanRecordTableBody");
@@ -696,7 +674,6 @@
           .map(i => `${i.quantity} x ${i.name}`)
           .join(", ");
 
-        // ----- Senarai Aset Sedang Dipinjam -----
         if (!loan.isReturned) {
           activeCount++;
 
@@ -746,7 +723,6 @@
           activeList.appendChild(card);
         }
 
-        // ----- Jadual Rekod Pinjaman -----
         const tr = document.createElement("tr");
         tr.className = "hover:bg-gray-50 text-[11px]";
         tr.innerHTML = `
@@ -783,7 +759,6 @@
         ? `${activeCount} aset sedang dipinjam`
         : "";
 
-      const noActive = document.getElementById("noActiveLoans");
       noActive.classList.toggle("hidden", activeCount > 0);
     }
 
@@ -794,7 +769,6 @@
       return d.toLocaleDateString("ms-MY");
     }
 
-    // Untuk dipanggil dari HTML
     function markReturned(loanId) {
       const loan = loansCache[loanId];
       if (!loan || loan.isReturned) return;
@@ -802,7 +776,6 @@
 
       const updates = {};
 
-      // pulangkan stok
       Object.entries(loan.items || {}).forEach(([id, item]) => {
         const asset = assetsCache[id];
         if (!asset) return;
@@ -818,14 +791,11 @@
     }
     window.markReturned = markReturned;
 
-    // Kosongkan rekod lama (yang sudah dipulangkan)
     document.getElementById("clearRecordsBtn").addEventListener("click", () => {
       if (!confirm("Padam semua rekod yang telah dipulangkan?")) return;
       const updates = {};
       Object.entries(loansCache).forEach(([id, loan]) => {
-        if (loan.isReturned) {
-          updates["loans/" + id] = null;
-        }
+        if (loan.isReturned) updates["loans/" + id] = null;
       });
       if (Object.keys(updates).length === 0) {
         alert("Tiada rekod dipulangkan untuk dipadam.");
@@ -836,9 +806,7 @@
       }).catch(console.error);
     });
 
-    // =========================
-    // 8. Fungsi Admin Aset
-    // =========================
+    // Admin aset
     function resetAssetForm() {
       if (!assetForm) return;
       currentEditAssetId = null;
@@ -871,15 +839,7 @@
 
         const specs = textareaToSpecs(assetSpecsField.value);
 
-        const assetData = {
-          name,
-          category,
-          imageUrl,
-          total,
-          available,
-          specs
-        };
-
+        const assetData = { name, category, imageUrl, total, available, specs };
         const existingId = assetIdField.value;
 
         if (!existingId) {
@@ -906,9 +866,7 @@
         }
       });
 
-      assetFormResetBtn.addEventListener("click", function () {
-        resetAssetForm();
-      });
+      assetFormResetBtn.addEventListener("click", resetAssetForm);
     }
 
     function startEditAsset(id) {
@@ -931,9 +889,7 @@
       assetFormTitle.textContent = "Edit Aset";
 
       const panel = document.getElementById("adminAssetPanel");
-      if (panel) {
-        panel.scrollIntoView({ behavior: "smooth" });
-      }
+      if (panel) panel.scrollIntoView({ behavior: "smooth" });
     }
     window.startEditAsset = startEditAsset;
 
@@ -956,16 +912,11 @@
 
     function updateAdminUI() {
       const panel = document.getElementById("adminAssetPanel");
-      if (panel) {
-        panel.classList.toggle("hidden", !isAdmin);
-      }
-      // re-render untuk tunjuk / sorok butang edit/padam
+      if (panel) panel.classList.toggle("hidden", !isAdmin);
       renderAssets();
     }
 
-    // =========================
-    // 9. Admin Login (ringkas)
-    // =========================
+    // Admin login
     const adminLoginBtn = document.getElementById("adminLoginBtn");
     const adminLoginText = document.getElementById("adminLoginText");
     const tabRekodPinjaman = document.getElementById("tabRekodPinjaman");
@@ -974,7 +925,6 @@
     adminLoginBtn.addEventListener("click", () => {
       if (!isAdmin) {
         const pwd = prompt("Masukkan kata laluan admin:");
-        // boleh tukar password ikut suka
         if (pwd === "admin123") {
           isAdmin = true;
           adminLoginText.textContent = "Log Keluar";
@@ -996,7 +946,7 @@
       }
     });
 
-    // Mula-mula tunjuk Permohonan
+    // Mula-mula
     showPage("permohonan");
   </script>
 </body>
