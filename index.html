@@ -14,11 +14,11 @@
     .tab-inactive { border-bottom-width: 2px; border-color: transparent; color: #4b5563; }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-[#f3f5f7] min-h-screen">
 
   <!-- TOP BAR -->
   <header class="bg-white shadow-sm">
-    <div class="max-w-6xl mx-auto flex items-center justify-between py-3 px-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between py-3 px-4">
       <div class="flex items-center gap-3">
         <!-- LOGO BARU SKSA -->
         <img src="https://i.imgur.com/wpfWEN4.png" alt="Logo SK Sri Aman" class="w-10 h-10 rounded-full border" />
@@ -29,14 +29,14 @@
       </div>
 
       <button id="adminLoginBtn"
-              class="flex items-center gap-2 text-sm px-4 py-2 border rounded-full hover:bg-gray-50">
+              class="flex items-center gap-2 text-sm px-5 py-2 border border-gray-200 rounded-full shadow-sm bg-white hover:bg-gray-50">
         <span>🔐</span><span id="adminLoginText">Log Masuk Admin</span>
       </button>
     </div>
 
     <!-- NAV TABS -->
-    <nav class="border-t border-gray-100">
-      <div class="max-w-6xl mx-auto flex gap-6 px-4 text-sm">
+    <nav class="border-t border-gray-100 bg-white">
+      <div class="max-w-7xl mx-auto flex gap-6 px-4 text-sm">
         <button class="py-3 tab-active" data-page="permohonan">Permohonan</button>
         <button class="py-3 tab-inactive" data-page="aset-tersedia">Aset Tersedia</button>
         <button class="py-3 tab-inactive" data-page="aset-dipinjam">Aset Dipinjam</button>
@@ -50,79 +50,105 @@
   </header>
 
   <!-- MAIN CONTENT -->
-  <main class="max-w-6xl mx-auto py-6 px-4 space-y-8">
+  <main class="max-w-7xl mx-auto py-8 px-4 space-y-8">
 
     <!-- PERMOHONAN -->
     <section id="page-permohonan" class="page-section">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div class="grid grid-cols-1 lg:grid-cols-[340px,minmax(0,1fr)] gap-6 items-start">
         <!-- FORM -->
-        <div class="lg:col-span-1 bg-white rounded-2xl shadow p-6">
-          <h2 class="font-semibold text-lg mb-1">Borang Permohonan Pinjaman</h2>
-          <p class="text-xs text-gray-500 mb-4">Isikan maklumat guru dan pilih aset di sebelah kanan.</p>
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+          <h2 class="font-semibold text-lg mb-1 text-gray-900">Borang Permohonan Pinjaman</h2>
+          <p class="text-xs text-gray-400 mb-5">Isikan maklumat guru dan pilih aset di sebelah kanan.</p>
 
           <form id="loanForm" class="space-y-4">
             <div>
-              <label class="block text-sm font-medium mb-1">Nama Guru <span class="text-red-500">*</span></label>
+              <label class="block text-sm font-medium mb-1 text-gray-700">
+                Nama Guru <span class="text-red-500">*</span>
+              </label>
               <input type="text" id="namaGuru"
-                     class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                     class="w-full rounded-full border border-gray-200 bg-gray-50 text-sm px-4 py-2.5
+                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                      placeholder="Masukkan nama penuh" required />
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">No. Kad Pengenalan <span class="text-red-500">*</span></label>
+              <label class="block text-sm font-medium mb-1 text-gray-700">
+                No. Kad Pengenalan <span class="text-red-500">*</span>
+              </label>
               <input type="text" id="noIC"
-                     class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                     class="w-full rounded-full border border-gray-200 bg-gray-50 text-sm px-4 py-2.5
+                            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                      placeholder="cth: 900101-01-1234" required />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium mb-1">Tarikh Pinjam <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium mb-1 text-gray-700">
+                  Tarikh Pinjam <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="tarikhPinjam"
-                       class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                       class="w-full rounded-full border border-gray-200 bg-gray-50 text-sm px-4 py-2.5
+                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                        required />
               </div>
               <div>
-                <label class="block text-sm font-medium mb-1">Tarikh Pulang <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium mb-1 text-gray-700">
+                  Tarikh Pulang <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="tarikhPulang"
-                       class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                       class="w-full rounded-full border border-gray-200 bg-gray-50 text-sm px-4 py-2.5
+                              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                        required />
               </div>
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">Tujuan Pinjaman <span class="text-red-500">*</span></label>
+              <label class="block text-sm font-medium mb-1 text-gray-700">
+                Tujuan Pinjaman <span class="text-red-500">*</span>
+              </label>
               <textarea id="tujuan"
-                        class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        class="w-full rounded-2xl border border-gray-200 bg-gray-50 text-sm px-4 py-3
+                               focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                         rows="4"
                         placeholder="Nyatakan tujuan penggunaan aset" required></textarea>
             </div>
 
             <button type="submit"
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 rounded-lg">
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-3 rounded-full shadow-md">
               Hantar Permohonan
             </button>
           </form>
         </div>
 
         <!-- PILIH ASET -->
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-semibold text-lg">Pilih Aset</h2>
-            <p class="text-xs text-gray-500">Tetapkan bilangan unit untuk setiap aset.</p>
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+            <div class="flex flex-wrap items-start justify-between gap-2 mb-4">
+              <div>
+                <h2 class="font-semibold text-lg text-gray-900">Pilih Aset</h2>
+                <p class="text-xs text-gray-400 mt-1">
+                  Pilih aset dan tetapkan bilangan unit yang diperlukan.
+                </p>
+              </div>
+              <p class="text-[11px] text-gray-400">
+                Tetapkan bilangan unit untuk setiap aset.
+              </p>
+            </div>
+            <div id="assetChoiceList"
+                 class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            </div>
           </div>
-          <div id="assetChoiceList" class="space-y-4"></div>
         </div>
       </div>
     </section>
 
     <!-- ASET TERSEDIA -->
     <section id="page-aset-tersedia" class="page-section hidden">
-      <h2 class="font-semibold text-lg mb-4">Aset Tersedia</h2>
+      <h2 class="font-semibold text-lg mb-4 text-gray-900">Aset Tersedia</h2>
 
       <!-- PANEL ADMIN: TAMBAH / EDIT ASET -->
       <div id="adminAssetPanel"
-           class="mb-4 bg-white rounded-2xl shadow p-4 border border-dashed border-emerald-400 hidden">
+           class="mb-4 bg-white rounded-3xl shadow-xl border border-dashed border-emerald-400 p-4 hidden">
         <div class="flex justify-between items-center mb-3">
           <h3 id="adminAssetFormTitle" class="font-semibold text-sm">Tambah Aset Baharu</h3>
           <button type="button" id="resetAssetFormBtn" class="text-xs text-gray-500 hover:underline">
@@ -138,19 +164,19 @@
             <div>
               <label class="block mb-1 font-medium">Nama Aset</label>
               <input id="assetName" type="text"
-                     class="w-full border rounded-md px-2 py-1.5"
+                     class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                      placeholder="cth: LAPTOP JOI CHROMEBOOK C100" />
             </div>
             <div>
               <label class="block mb-1 font-medium">Kategori</label>
               <input id="assetCategory" type="text"
-                     class="w-full border rounded-md px-2 py-1.5"
+                     class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                      placeholder="Laptop / Tablet / TV" />
             </div>
             <div>
               <label class="block mb-1 font-medium">URL Gambar</label>
               <input id="assetImageUrl" type="text"
-                     class="w-full border rounded-md px-2 py-1.5"
+                     class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                      placeholder="https://..." />
             </div>
           </div>
@@ -159,13 +185,13 @@
               <div>
                 <label class="block mb-1 font-medium">Jumlah Unit</label>
                 <input id="assetTotal" type="number" min="0"
-                       class="w-full border rounded-md px-2 py-1.5"
+                       class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                        value="0" />
               </div>
               <div>
                 <label class="block mb-1 font-medium">Unit Tersedia</label>
                 <input id="assetAvailable" type="number" min="0"
-                       class="w-full border rounded-md px-2 py-1.5"
+                       class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                        value="0" />
               </div>
             </div>
@@ -175,26 +201,26 @@
                 <span class="font-normal text-gray-500">(1 baris 1 item, format: Label: Nilai)</span>
               </label>
               <textarea id="assetSpecs" rows="4"
-                        class="w-full border rounded-md px-2 py-1.5"
+                        class="w-full border rounded-md px-2 py-1.5 bg-gray-50"
                         placeholder="Pemproses: Intel i5&#10;RAM: 8GB&#10;Storan: 256GB SSD"></textarea>
             </div>
           </div>
           <div class="md:col-span-2 flex justify-end">
             <button type="submit"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold">
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-semibold shadow">
               Simpan Aset
             </button>
           </div>
         </form>
       </div>
 
-      <div id="assetAvailableList" class="grid md:grid-cols-2 gap-4"></div>
+      <div id="assetAvailableList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>
 
     <!-- ASET DIPINJAM (AKTIF) -->
     <section id="page-aset-dipinjam" class="page-section hidden">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-semibold text-lg">Aset Sedang Dipinjam</h2>
+        <h2 class="font-semibold text-lg text-gray-900">Aset Sedang Dipinjam</h2>
         <p id="summaryActiveLoans" class="text-xs text-gray-500"></p>
       </div>
       <div id="loanActiveList" class="space-y-4"></div>
@@ -204,20 +230,20 @@
     <!-- REKOD PINJAMAN (ADMIN) -->
     <section id="page-rekod-pinjaman" class="page-section hidden">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="font-semibold text-lg">Semua Rekod Pinjaman</h2>
+        <h2 class="font-semibold text-lg text-gray-900">Semua Rekod Pinjaman</h2>
         <div class="flex gap-2">
           <button onclick="window.print()"
-                  class="flex items-center gap-2 text-xs px-3 py-2 border rounded-lg hover:bg-gray-50">
+                  class="flex items-center gap-2 text-xs px-3 py-2 border rounded-full bg-white shadow-sm hover:bg-gray-50">
             🖨 <span>Cetak Rekod</span>
           </button>
           <button id="clearRecordsBtn"
-                  class="flex items-center gap-2 text-xs px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                  class="flex items-center gap-2 text-xs px-3 py-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700">
             🗑 <span>Kosongkan Rekod Lama</span>
           </button>
         </div>
       </div>
 
-      <div class="overflow-x-auto bg-white rounded-2xl shadow">
+      <div class="overflow-x-auto bg-white rounded-3xl shadow-xl border border-gray-100">
         <table class="min-w-full text-xs">
           <thead class="bg-emerald-50 text-left">
             <tr>
@@ -263,7 +289,7 @@
       joi_chromebook_c100: {
         name: "LAPTOP JOI CHROMEBOOK C100",
         category: "Laptop",
-        imageUrl: "https://via.placeholder.com/120x80?text=JOI+C100",
+        imageUrl: "https://via.placeholder.com/400x260?text=JOI+C100",
         total: 5,
         available: 5,
         specs: {
@@ -280,7 +306,7 @@
       asus_vivobook_go15: {
         name: "LAPTOP ASUS VIVOBOOK GO 15",
         category: "Laptop",
-        imageUrl: "https://via.placeholder.com/120x80?text=ASUS+GO15",
+        imageUrl: "https://via.placeholder.com/400x260?text=ASUS+GO+15",
         total: 5,
         available: 5,
         specs: {
@@ -296,7 +322,7 @@
       lenovo_k14_gen2: {
         name: "LAPTOP LENOVO K14 Gen 2",
         category: "Laptop",
-        imageUrl: "https://via.placeholder.com/120x80?text=LENOVO+K14",
+        imageUrl: "https://via.placeholder.com/400x260?text=LENOVO+K14",
         total: 4,
         available: 4,
         specs: {
@@ -311,7 +337,7 @@
       lenovo_tab_m9: {
         name: "Lenovo Tab M9",
         category: "Tablet",
-        imageUrl: "https://via.placeholder.com/120x80?text=Tab+M9",
+        imageUrl: "https://via.placeholder.com/400x260?text=Tab+M9",
         total: 34,
         available: 34,
         specs: {
@@ -324,7 +350,7 @@
       lg_tv_65: {
         name: 'SMART TV LG 65"',
         category: "TV",
-        imageUrl: "https://via.placeholder.com/120x80?text=LG+65",
+        imageUrl: "https://via.placeholder.com/400x260?text=LG+65",
         total: 18,
         available: 18,
         specs: {
@@ -337,7 +363,7 @@
       joi_classmate_10: {
         name: "LAPTOP JOI CLASSMATE 10",
         category: "Laptop",
-        imageUrl: "https://via.placeholder.com/120x80?text=Classmate+10",
+        imageUrl: "https://via.placeholder.com/400x260?text=Classmate+10",
         total: 5,
         available: 5,
         specs: {
@@ -436,6 +462,8 @@
     function renderAssets() {
       const choiceList = document.getElementById("assetChoiceList");
       const availList = document.getElementById("assetAvailableList");
+      if (!choiceList || !availList) return;
+
       choiceList.innerHTML = "";
       availList.innerHTML = "";
 
@@ -444,95 +472,106 @@
         const total = asset.total ?? available;
         const current = selectedQuantities[id] || 0;
 
-        // kad pilih aset
+        // Kad untuk pilih aset (permohonan)
         const cardChoice = document.createElement("div");
-        cardChoice.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex gap-4";
+        cardChoice.className =
+          "bg-white rounded-3xl shadow-md border border-gray-100 p-5 flex flex-col items-center text-center transition hover:shadow-xl";
         cardChoice.innerHTML = `
-          <img src="${asset.imageUrl || 'https://via.placeholder.com/120x80?text=ASSET'}"
-               alt="${asset.name}"
-               class="w-20 h-20 object-cover rounded-xl bg-white shadow" />
-          <div class="flex-1">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="text-[11px] uppercase tracking-wide text-gray-500">${asset.category || 'Aset'}</p>
-                <h3 class="font-semibold text-sm md:text-base text-gray-900">${asset.name}</h3>
-                <p class="text-[11px] text-gray-500 mt-1">${available} daripada ${total} tersedia</p>
-              </div>
-              <div class="bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full self-start">
-                ${available}
-              </div>
+          <div class="w-full flex-1 flex flex-col items-center">
+            <div class="w-full flex justify-center mb-4">
+              <img src="${asset.imageUrl || 'https://via.placeholder.com/400x260?text=ASSET'}"
+                   alt="${asset.name}"
+                   class="h-32 object-contain drop-shadow-md" />
             </div>
-            <div class="mt-3 flex items-center gap-2">
-              <button type="button"
-                      onclick="changeAssetQuantity('${id}', -1, ${available})"
-                      class="w-8 h-8 flex items-center justify-center border rounded-full bg-white hover:bg-gray-50">
-                −
-              </button>
-              <input type="text"
-                     id="qty-${id}"
-                     value="${current}"
-                     readonly
-                     class="w-12 text-center text-sm border rounded-lg bg-white" />
-              <button type="button"
-                      onclick="changeAssetQuantity('${id}', 1, ${available})"
-                      class="w-8 h-8 flex items-center justify-center border rounded-full bg-white hover:bg-gray-50">
-                +
-              </button>
-              <span class="text-sm text-gray-600 ml-1">unit</span>
-            </div>
+            <p class="text-[11px] uppercase tracking-[0.25em] text-gray-400">
+              ${asset.category || 'Aset'}
+            </p>
+            <h3 class="mt-1 font-semibold text-sm md:text-base text-gray-900">${asset.name}</h3>
+            <p class="mt-1 text-[11px] text-gray-400">${available} daripada ${total} tersedia</p>
+          </div>
+
+          <div class="mt-4 flex items-center justify-center gap-2">
             <button type="button"
-                    onclick="toggleSpec('${id}-choice-spec')"
-                    class="mt-3 text-xs text-emerald-700 hover:underline flex items-center gap-1">
-              <span>Spesifikasi</span><span>▾</span>
+                    onclick="changeAssetQuantity('${id}', -1, ${available})"
+                    class="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full bg-gray-50 hover:bg-gray-100">
+              −
             </button>
-            <div id="${id}-choice-spec"
-                 class="hidden mt-2 bg-white rounded-xl border text-[11px] px-4 py-3 grid grid-cols-2 gap-y-1">
-              ${renderSpecRows(asset.specs)}
-            </div>
+            <input type="text"
+                   id="qty-${id}"
+                   value="${current}"
+                   readonly
+                   class="w-12 text-center text-sm border border-gray-200 rounded-full bg-gray-50" />
+            <button type="button"
+                    onclick="changeAssetQuantity('${id}', 1, ${available})"
+                    class="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-full bg-gray-50 hover:bg-gray-100">
+              +
+            </button>
+            <span class="text-sm text-gray-600 ml-1">unit</span>
+          </div>
+
+          <button type="button"
+                  onclick="toggleSpec('${id}-choice-spec')"
+                  class="mt-3 text-[11px] text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+            <span>Spesifikasi</span><span>▾</span>
+          </button>
+
+          <div id="${id}-choice-spec"
+               class="hidden mt-2 w-full bg-gray-50 rounded-2xl border border-gray-100 text-[11px] px-4 py-3 text-left grid grid-cols-2 gap-y-1">
+            ${renderSpecRows(asset.specs)}
           </div>
         `;
         choiceList.appendChild(cardChoice);
 
-        // kad aset tersedia
+        // Kad untuk Aset Tersedia
         const cardAvail = document.createElement("div");
-        cardAvail.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex flex-col gap-3";
+        cardAvail.className =
+          "bg-white rounded-3xl shadow-md border border-gray-100 p-5 flex flex-col transition hover:shadow-xl";
         cardAvail.innerHTML = `
           <div class="flex gap-4">
-            <img src="${asset.imageUrl || 'https://via.placeholder.com/120x80?text=ASSET'}"
-                 alt="${asset.name}"
-                 class="w-20 h-20 object-cover rounded-xl bg-white shadow" />
+            <div class="flex-shrink-0">
+              <img src="${asset.imageUrl || 'https://via.placeholder.com/400x260?text=ASSET'}"
+                   alt="${asset.name}"
+                   class="w-24 h-24 object-contain rounded-2xl bg-gray-50" />
+            </div>
             <div class="flex-1">
-              <div class="flex justify-between items-start">
+              <div class="flex justify-between items-start gap-2">
                 <div>
-                  <p class="text-[11px] uppercase tracking-wide text-gray-500">${asset.category || 'Aset'}</p>
+                  <p class="text-[11px] uppercase tracking-[0.25em] text-gray-400">
+                    ${asset.category || 'Aset'}
+                  </p>
                   <h3 class="font-semibold text-sm md:text-base text-gray-900">${asset.name}</h3>
-                  <p class="text-[11px] text-gray-500 mt-1">${available} daripada ${total} tersedia</p>
+                  <p class="text-[11px] text-gray-400 mt-1">
+                    ${available} daripada ${total} tersedia
+                  </p>
                 </div>
-                <div class="bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full self-start">
+                <div class="bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full self-start shadow-sm">
                   ${available}
                 </div>
               </div>
             </div>
           </div>
+
           <button type="button"
                   onclick="toggleSpec('${id}-avail-spec')"
-                  class="text-xs text-emerald-700 hover:underline flex items-center gap-1">
+                  class="mt-3 text-[11px] text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
             <span>Spesifikasi</span><span>▾</span>
           </button>
+
           <div id="${id}-avail-spec"
-               class="hidden mt-1 bg-white rounded-xl border text-[11px] px-4 py-3 grid grid-cols-2 gap-y-1">
+               class="hidden mt-2 bg-gray-50 rounded-2xl border border-gray-100 text-[11px] px-4 py-3 grid grid-cols-2 gap-y-1">
             ${renderSpecRows(asset.specs)}
           </div>
+
           ${isAdmin ? `
-          <div class="mt-3 flex justify-end gap-2">
+          <div class="mt-4 flex justify-end gap-2">
             <button type="button"
                     onclick="startEditAsset('${id}')"
-                    class="px-3 py-1.5 text-[11px] border rounded-lg hover:bg-white">
+                    class="px-3 py-1.5 text-[11px] border border-gray-200 rounded-full bg-white hover:bg-gray-50">
               Edit
             </button>
             <button type="button"
                     onclick="deleteAsset('${id}')"
-                    class="px-3 py-1.5 text-[11px] bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    class="px-3 py-1.5 text-[11px] bg-red-600 text-white rounded-full hover:bg-red-700">
               Padam
             </button>
           </div>
@@ -660,6 +699,8 @@
       const summaryActive = document.getElementById("summaryActiveLoans");
       const noActive = document.getElementById("noActiveLoans");
 
+      if (!activeList || !recordBody || !summaryActive || !noActive) return;
+
       activeList.innerHTML = "";
       recordBody.innerHTML = "";
 
@@ -679,18 +720,19 @@
           activeCount++;
 
           const card = document.createElement("div");
-          card.className = "bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-4";
+          card.className =
+            "bg-white rounded-3xl shadow-md border border-gray-100 p-5";
           card.innerHTML = `
             <div class="flex justify-between items-center mb-3">
               <div class="flex items-center gap-2 text-sm font-semibold text-gray-800">
                 <span>👤</span><span>${loan.guruName}</span>
               </div>
-              <span class="text-[11px] px-3 py-1 rounded-full bg-emerald-500 text-white font-semibold">
+              <span class="text-[11px] px-3 py-1 rounded-full bg-emerald-500 text-white font-semibold shadow-sm">
                 Diluluskan
               </span>
             </div>
 
-            <div class="bg-emerald-100 rounded-2xl px-4 py-3 mb-3 flex items-center gap-3">
+            <div class="bg-emerald-50 rounded-2xl px-4 py-3 mb-3 flex items-center gap-3">
               <span class="text-xl">⏰</span>
               <div>
                 <p class="text-[11px] uppercase tracking-wide text-gray-600">Masa Pinjaman</p>
@@ -701,23 +743,23 @@
             </div>
 
             <div class="text-xs text-gray-700 space-y-1 mb-3">
-              <div class="flex justify-between">
+              <div class="flex justify-between gap-2">
                 <span class="font-semibold">Aset Dipinjam</span>
-                <span>${itemListText}</span>
+                <span class="text-right">${itemListText}</span>
               </div>
-              <div class="flex justify-between">
+              <div class="flex justify-between gap-2">
                 <span class="font-semibold">Tarikh</span>
-                <span>${formatDate(loan.startDate)} - ${formatDate(loan.endDate)}</span>
+                <span class="text-right">${formatDate(loan.startDate)} - ${formatDate(loan.endDate)}</span>
               </div>
-              <div class="flex justify-between">
+              <div class="flex justify-between gap-2">
                 <span class="font-semibold">Tujuan</span>
-                <span>${loan.purpose}</span>
+                <span class="text-right">${loan.purpose}</span>
               </div>
             </div>
 
             <button type="button"
                     onclick="markReturned('${id}')"
-                    class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg">
+                    class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-full shadow">
               Tandakan Pulang
             </button>
           `;
@@ -747,7 +789,7 @@
               ? '<span class="text-gray-400 text-[10px]">Selesai</span>'
               : `<button type="button"
                          onclick="markReturned('${id}')"
-                         class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded">
+                         class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full">
                    Pulang
                  </button>`
             }
