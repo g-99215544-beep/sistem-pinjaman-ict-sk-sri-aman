@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Pinjaman Aset ICT</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif; }
+    .tab-active { border-bottom-width: 2px; border-color: #059669; color: #059669; }
+    .tab-inactive { border-bottom-width: 2px; border-color: transparent; color: #4b5563; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- TOP BAR -->
+  <header class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto flex items-center justify-between py-3 px-4">
+      <div class="flex items-center gap-3">
+        <img src="https://i.imgur.com/AfsVtFJ.png" alt="Logo SKSA" class="w-10 h-10 rounded-full border" />
+        <div>
+          <h1 id="appTitle" class="font-bold text-lg text-gray-900">Sistem Pinjaman Aset ICT</h1>
+          <p class="text-xs text-gray-500">SK Sri Aman</p>
+        </div>
+      </div>
+
+      <button id="adminLoginBtn"
+              class="flex items-center gap-2 text-sm px-4 py-2 border rounded-full hover:bg-gray-50">
+        <span>🔐</span><span id="adminLoginText">Log Masuk Admin</span>
+      </button>
+    </div>
+
+    <!-- NAV TABS -->
+    <nav class="border-t border-gray-100">
+      <div class="max-w-6xl mx-auto flex gap-6 px-4 text-sm">
+        <button class="py-3 tab-active" data-page="permohonan">Permohonan</button>
+        <button class="py-3 tab-inactive" data-page="aset-tersedia">Aset Tersedia</button>
+        <button class="py-3 tab-inactive" data-page="aset-dipinjam">Aset Dipinjam</button>
+        <button id="tabRekodPinjaman"
+                class="py-3 tab-inactive hidden"
+                data-page="rekod-pinjaman">
+          Rekod Pinjaman
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-6xl mx-auto py-6 px-4 space-y-8">
+
+    <!-- PERMOHONAN -->
+    <section id="page-permohonan" class="page-section">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- FORM -->
+        <div class="lg:col-span-1 bg-white rounded-2xl shadow p-6">
+          <h2 class="font-semibold text-lg mb-1">Borang Permohonan Pinjaman</h2>
+          <p class="text-xs text-gray-500 mb-4">Isikan maklumat guru dan pilih aset di sebelah kanan.</p>
+
+          <form id="loanForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Nama Guru <span class="text-red-500">*</span></label>
+              <input type="text" id="namaGuru"
+                     class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                     placeholder="Masukkan nama penuh" required />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">No. Kad Pengenalan <span class="text-red-500">*</span></label>
+              <input type="text" id="noIC"
+                     class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                     placeholder="cth: 900101-01-1234" required />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Tarikh Pinjam <span class="text-red-500">*</span></label>
+                <input type="date" id="tarikhPinjam"
+                       class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                       required />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Tarikh Pulang <span class="text-red-500">*</span></label>
+                <input type="date" id="tarikhPulang"
+                       class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                       required />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Tujuan Pinjaman <span class="text-red-500">*</span></label>
+              <textarea id="tujuan"
+                        class="w-full border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        rows="4"
+                        placeholder="Nyatakan tujuan penggunaan aset" required></textarea>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-2.5 rounded-lg">
+              Hantar Permohonan
+            </button>
+          </form>
+        </div>
+
+        <!-- PILIH ASET -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-lg">Pilih Aset</h2>
+            <p class="text-xs text-gray-500">Tetapkan bilangan unit untuk setiap aset.</p>
+          </div>
+          <div id="assetChoiceList" class="space-y-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ASET TERSEDIA -->
+    <section id="page-aset-tersedia" class="page-section hidden">
+      <h2 class="font-semibold text-lg mb-4">Aset Tersedia</h2>
+      <div id="assetAvailableList" class="grid md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- ASET DIPINJAM (AKTIF) -->
+    <section id="page-aset-dipinjam" class="page-section hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-lg">Aset Sedang Dipinjam</h2>
+        <p id="summaryActiveLoans" class="text-xs text-gray-500"></p>
+      </div>
+      <div id="loanActiveList" class="space-y-4"></div>
+      <p id="noActiveLoans" class="text-sm text-gray-500 hidden">Tiada aset sedang dipinjam.</p>
+    </section>
+
+    <!-- REKOD PINJAMAN (ADMIN) -->
+    <section id="page-rekod-pinjaman" class="page-section hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-lg">Semua Rekod Pinjaman</h2>
+        <div class="flex gap-2">
+          <button onclick="window.print()"
+                  class="flex items-center gap-2 text-xs px-3 py-2 border rounded-lg hover:bg-gray-50">
+            🖨 <span>Cetak Rekod</span>
+          </button>
+          <button id="clearRecordsBtn"
+                  class="flex items-center gap-2 text-xs px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            🗑 <span>Kosongkan Rekod Lama</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto bg-white rounded-2xl shadow">
+        <table class="min-w-full text-xs">
+          <thead class="bg-emerald-50 text-left">
+            <tr>
+              <th class="px-4 py-3 font-semibold">Nama Guru</th>
+              <th class="px-4 py-3 font-semibold">No. IC</th>
+              <th class="px-4 py-3 font-semibold">Aset Dipinjam</th>
+              <th class="px-4 py-3 font-semibold">Tarikh</th>
+              <th class="px-4 py-3 font-semibold">Tujuan</th>
+              <th class="px-4 py-3 font-semibold">Status</th>
+              <th class="px-4 py-3 font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="loanRecordTableBody" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FIREBASE & APP SCRIPT -->
+  <!-- Firebase compat SDK (v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
+
+  <script>
+    // =========================
+    // 1. Firebase Config
+    // =========================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCV5skKQO1i-T6pOckTEyhDG8H4fh7vS7s",
+      authDomain: "sistem-pinjaman-aset-ict-v2.firebaseapp.com",
+      databaseURL: "https://sistem-pinjaman-aset-ict-v2-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sistem-pinjaman-aset-ict-v2",
+      storageBucket: "sistem-pinjaman-aset-ict-v2.firebasestorage.app",
+      messagingSenderId: "1013418266777",
+      appId: "1:1013418266777:web:f3ec4d5f38fe7b87b76808",
+      measurementId: "G-9CQDWM207Z"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // =========================
+    // 2. Data Sedia Ada (Seed)
+    // =========================
+    const defaultAssets = {
+      joi_chromebook_c100: {
+        name: "LAPTOP JOI CHROMEBOOK C100",
+        category: "Laptop",
+        imageUrl: "https://via.placeholder.com/120x80?text=JOI+C100",
+        total: 5,
+        available: 5,
+        specs: {
+          "Pemproses": "MediaTek Kompanio 520",
+          "RAM": "4GB LPDDR4X",
+          "Storan": "64GB eMMC",
+          "Skrin": "11.6 inci",
+          "Resolusi": "1366 x 768 HD",
+          "Kecerahan": "250 nits",
+          "Sambungan": "Wi-Fi 6, Bluetooth 5.0",
+          "Lain-lain": "ChromeOS"
+        }
+      },
+      asus_vivobook_go15: {
+        name: "LAPTOP ASUS VIVOBOOK GO 15",
+        category: "Laptop",
+        imageUrl: "https://via.placeholder.com/120x80?text=ASUS+GO15",
+        total: 5,
+        available: 5,
+        specs: {
+          "Pemproses": "AMD Ryzen / Intel",
+          "RAM": "8GB",
+          "Storan": "256GB SSD",
+          "Skrin": "15.6 inci",
+          "Resolusi": "1920 x 1080",
+          "Sambungan": "Wi-Fi, Bluetooth",
+          "Lain-lain": "Windows 11"
+        }
+      },
+      lenovo_k14_gen2: {
+        name: "LAPTOP LENOVO K14 Gen 2",
+        category: "Laptop",
+        imageUrl: "https://via.placeholder.com/120x80?text=LENOVO+K14",
+        total: 4,
+        available: 4,
+        specs: {
+          "Pemproses": "Intel Core i5",
+          "RAM": "8GB",
+          "Storan": "256GB SSD",
+          "Skrin": "14 inci",
+          "Resolusi": "1920 x 1080",
+          "Lain-lain": "Windows 11"
+        }
+      },
+      lenovo_tab_m9: {
+        name: "Lenovo Tab M9",
+        category: "Tablet",
+        imageUrl: "https://via.placeholder.com/120x80?text=Tab+M9",
+        total: 34,
+        available: 34,
+        specs: {
+          "Skrin": "9 inci",
+          "Storan": "64GB",
+          "RAM": "4GB",
+          "Sistem": "Android"
+        }
+      },
+      lg_tv_65: {
+        name: 'SMART TV LG 65"',
+        category: "TV",
+        imageUrl: "https://via.placeholder.com/120x80?text=LG+65",
+        total: 18,
+        available: 18,
+        specs: {
+          "Skrin": '65"',
+          "Resolusi": "4K UHD",
+          "Sistem": "webOS",
+          "Lain-lain": "Smart TV"
+        }
+      },
+      joi_classmate_10: {
+        name: "LAPTOP JOI CLASSMATE 10",
+        category: "Laptop",
+        imageUrl: "https://via.placeholder.com/120x80?text=Classmate+10",
+        total: 5,
+        available: 5,
+        specs: {
+          "Skrin": "10 inci",
+          "Sistem": "Windows / ChromeOS"
+        }
+      }
+    };
+
+    let assetsCache = {};
+    let loansCache = {};
+    let selectedQuantities = {};
+    let isAdmin = false;
+
+    const assetsRef = db.ref("assets");
+    const loansRef = db.ref("loans");
+
+    // Seed assets jika kosong
+    assetsRef.once("value").then((snap) => {
+      if (!snap.exists()) {
+        assetsRef.set(defaultAssets);
+      }
+    });
+
+    // Listener aset
+    assetsRef.on("value", (snap) => {
+      assetsCache = snap.val() || {};
+      renderAssets();
+    });
+
+    // Listener loans
+    loansRef.on("value", (snap) => {
+      loansCache = snap.val() || {};
+      renderLoans();
+    });
+
+    // =========================
+    // 3. UI: Tabs
+    // =========================
+    const tabButtons = document.querySelectorAll("[data-page]");
+    const sections = {
+      "permohonan": document.getElementById("page-permohonan"),
+      "aset-tersedia": document.getElementById("page-aset-tersedia"),
+      "aset-dipinjam": document.getElementById("page-aset-dipinjam"),
+      "rekod-pinjaman": document.getElementById("page-rekod-pinjaman")
+    };
+
+    function showPage(pageKey) {
+      for (const key in sections) {
+        sections[key].classList.toggle("hidden", key !== pageKey);
+      }
+      tabButtons.forEach(btn => {
+        const isActive = btn.dataset.page === pageKey;
+        btn.classList.toggle("tab-active", isActive);
+        btn.classList.toggle("tab-inactive", !isActive);
+      });
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => showPage(btn.dataset.page));
+    });
+
+    // =========================
+    // 4. Render Aset
+    // =========================
+    function renderAssets() {
+      const choiceList = document.getElementById("assetChoiceList");
+      const availList = document.getElementById("assetAvailableList");
+      choiceList.innerHTML = "";
+      availList.innerHTML = "";
+
+      Object.entries(assetsCache).forEach(([id, asset]) => {
+        const available = asset.available ?? 0;
+        const total = asset.total ?? available;
+        const current = selectedQuantities[id] || 0;
+
+        // --- Card untuk Permohonan (dengan kuantiti) ---
+        const cardChoice = document.createElement("div");
+        cardChoice.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex gap-4";
+        cardChoice.innerHTML = `
+          <img src="${asset.imageUrl || 'https://via.placeholder.com/120x80?text=ASSET'}"
+               alt="${asset.name}"
+               class="w-20 h-20 object-cover rounded-xl bg-white shadow" />
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[11px] uppercase tracking-wide text-gray-500">${asset.category || 'Aset'}</p>
+                <h3 class="font-semibold text-sm md:text-base text-gray-900">${asset.name}</h3>
+                <p class="text-[11px] text-gray-500 mt-1">${available} daripada ${total} tersedia</p>
+              </div>
+              <div class="bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full self-start">
+                ${available}
+              </div>
+            </div>
+            <div class="mt-3 flex items-center gap-2">
+              <button type="button"
+                      onclick="changeAssetQuantity('${id}', -1, ${available})"
+                      class="w-8 h-8 flex items-center justify-center border rounded-full bg-white hover:bg-gray-50">
+                −
+              </button>
+              <input type="text"
+                     id="qty-${id}"
+                     value="${current}"
+                     readonly
+                     class="w-12 text-center text-sm border rounded-lg bg-white" />
+              <button type="button"
+                      onclick="changeAssetQuantity('${id}', 1, ${available})"
+                      class="w-8 h-8 flex items-center justify-center border rounded-full bg-white hover:bg-gray-50">
+                +
+              </button>
+              <span class="text-sm text-gray-600 ml-1">unit</span>
+            </div>
+            <button type="button"
+                    onclick="toggleSpec('${id}-choice-spec')"
+                    class="mt-3 text-xs text-emerald-700 hover:underline flex items-center gap-1">
+              <span>Spesifikasi</span><span>▾</span>
+            </button>
+            <div id="${id}-choice-spec"
+                 class="hidden mt-2 bg-white rounded-xl border text-[11px] px-4 py-3 grid grid-cols-2 gap-y-1">
+              ${renderSpecRows(asset.specs)}
+            </div>
+          </div>
+        `;
+        choiceList.appendChild(cardChoice);
+
+        // --- Card untuk Aset Tersedia (tanpa kuantiti) ---
+        const cardAvail = document.createElement("div");
+        cardAvail.className = "border-2 border-emerald-500 bg-emerald-50 rounded-2xl p-4 flex flex-col gap-3";
+        cardAvail.innerHTML = `
+          <div class="flex gap-4">
+            <img src="${asset.imageUrl || 'https://via.placeholder.com/120x80?text=ASSET'}"
+                 alt="${asset.name}"
+                 class="w-20 h-20 object-cover rounded-xl bg-white shadow" />
+            <div class="flex-1">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="text-[11px] uppercase tracking-wide text-gray-500">${asset.category || 'Aset'}</p>
+                  <h3 class="font-semibold text-sm md:text-base text-gray-900">${asset.name}</h3>
+                  <p class="text-[11px] text-gray-500 mt-1">${available} daripada ${total} tersedia</p>
+                </div>
+                <div class="bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full self-start">
+                  ${available}
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button"
+                  onclick="toggleSpec('${id}-avail-spec')"
+                  class="text-xs text-emerald-700 hover:underline flex items-center gap-1">
+            <span>Spesifikasi</span><span>▾</span>
+          </button>
+          <div id="${id}-avail-spec"
+               class="hidden mt-1 bg-white rounded-xl border text-[11px] px-4 py-3 grid grid-cols-2 gap-y-1">
+            ${renderSpecRows(asset.specs)}
+          </div>
+        `;
+        availList.appendChild(cardAvail);
+      });
+    }
+
+    function renderSpecRows(specsObj) {
+      if (!specsObj) return '<span class="col-span-2 text-gray-400">Tiada spesifikasi direkodkan.</span>';
+      return Object.entries(specsObj).map(([k, v]) => `
+        <div class="text-gray-500">${k}</div>
+        <div class="text-gray-800 font-medium">${v}</div>
+      `).join("");
+    }
+
+    // Untuk dipanggil dari HTML (inline onclick)
+    function changeAssetQuantity(id, delta, maxAvailable) {
+      const oldVal = selectedQuantities[id] || 0;
+      let newVal = oldVal + delta;
+      if (newVal < 0) newVal = 0;
+      if (newVal > maxAvailable) newVal = maxAvailable;
+      selectedQuantities[id] = newVal;
+      const input = document.getElementById("qty-" + id);
+      if (input) input.value = newVal;
+    }
+    window.changeAssetQuantity = changeAssetQuantity; // expose global
+
+    function toggleSpec(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle("hidden");
+    }
+    window.toggleSpec = toggleSpec;
+
+    // =========================
+    // 5. Hantar Permohonan
+    // =========================
+    document.getElementById("loanForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const namaGuru = document.getElementById("namaGuru").value.trim();
+      const noIC = document.getElementById("noIC").value.trim();
+      const tarikhPinjam = document.getElementById("tarikhPinjam").value;
+      const tarikhPulang = document.getElementById("tarikhPulang").value;
+      const tujuan = document.getElementById("tujuan").value.trim();
+
+      const selectedItems = {};
+      let totalUnit = 0;
+
+      Object.entries(selectedQuantities).forEach(([id, qty]) => {
+        if (qty > 0 && assetsCache[id]) {
+          selectedItems[id] = {
+            name: assetsCache[id].name,
+            quantity: qty
+          };
+          totalUnit += qty;
+        }
+      });
+
+      if (!totalUnit) {
+        alert("Sila pilih sekurang-kurangnya satu aset untuk dipinjam.");
+        return;
+      }
+      if (!namaGuru || !noIC || !tarikhPinjam || !tarikhPulang || !tujuan) {
+        alert("Sila lengkapkan semua maklumat borang.");
+        return;
+      }
+      if (tarikhPulang < tarikhPinjam) {
+        alert("Tarikh pulang tidak boleh lebih awal daripada tarikh pinjam.");
+        return;
+      }
+
+      // Semak stok
+      for (const [id, item] of Object.entries(selectedItems)) {
+        const asset = assetsCache[id];
+        const available = asset.available ?? 0;
+        if (item.quantity > available) {
+          alert(`Stok untuk "${asset.name}" tidak mencukupi.`);
+          return;
+        }
+      }
+
+      if (!confirm("Hantar permohonan pinjaman aset?")) return;
+
+      const newLoanRef = loansRef.push();
+      const loanId = newLoanRef.key;
+
+      const loanData = {
+        id: loanId,
+        guruName: namaGuru,
+        ic: noIC,
+        startDate: tarikhPinjam,
+        endDate: tarikhPulang,
+        purpose: tujuan,
+        items: selectedItems,
+        status: "Diluluskan",   // untuk versi mudah: terus lulus
+        isReturned: false,
+        createdAt: new Date().toISOString()
+      };
+
+      const updates = {};
+      updates["loans/" + loanId] = loanData;
+
+      // Kemaskini stok aset
+      Object.entries(selectedItems).forEach(([id, item]) => {
+        const asset = assetsCache[id];
+        const available = asset.available ?? 0;
+        updates["assets/" + id + "/available"] = available - item.quantity;
+      });
+
+      db.ref().update(updates)
+        .then(() => {
+          alert("Permohonan dihantar & diluluskan.");
+          // reset form & pilihan
+          document.getElementById("loanForm").reset();
+          selectedQuantities = {};
+          renderAssets();
+          showPage("aset-dipinjam");
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Ralat semasa menyimpan permohonan. Sila cuba lagi.");
+        });
+    });
+
+    // =========================
+    // 6. Render Loans
+    // =========================
+    function renderLoans() {
+      const activeList = document.getElementById("loanActiveList");
+      const recordBody = document.getElementById("loanRecordTableBody");
+      const summaryActive = document.getElementById("summaryActiveLoans");
+      const noActive = document.getElementById("noActiveLoans");
+
+      activeList.innerHTML = "";
+      recordBody.innerHTML = "";
+
+      const now = new Date();
+      let activeCount = 0;
+      let totalLoans = 0;
+
+      Object.entries(loansCache).forEach(([id, loan]) => {
+        totalLoans++;
+
+        const start = new Date(loan.startDate);
+        const end = new Date(loan.endDate);
+        const msDiff = end - now;
+        const daysLeft = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
+
+        const itemListText = Object.values(loan.items || {})
+          .map(i => `${i.quantity} x ${i.name}`)
+          .join(", ");
+
+        // ----- Senarai Aset Sedang Dipinjam -----
+        if (!loan.isReturned) {
+          activeCount++;
+
+          const card = document.createElement("div");
+          card.className = "bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-4";
+          card.innerHTML = `
+            <div class="flex justify-between items-center mb-3">
+              <div class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                <span>👤</span><span>${loan.guruName}</span>
+              </div>
+              <span class="text-[11px] px-3 py-1 rounded-full bg-emerald-500 text-white font-semibold">
+                Diluluskan
+              </span>
+            </div>
+
+            <div class="bg-emerald-100 rounded-2xl px-4 py-3 mb-3 flex items-center gap-3">
+              <span class="text-xl">⏰</span>
+              <div>
+                <p class="text-[11px] uppercase tracking-wide text-gray-600">Masa Pinjaman</p>
+                <p class="text-lg font-bold text-emerald-700">
+                  ${daysLeft >= 0 ? `${daysLeft} HARI LAGI` : "TAMAT TEMPOH"}
+                </p>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-700 space-y-1 mb-3">
+              <div class="flex justify-between">
+                <span class="font-semibold">Aset Dipinjam</span>
+                <span>${itemListText}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-semibold">Tarikh</span>
+                <span>${formatDate(loan.startDate)} - ${formatDate(loan.endDate)}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-semibold">Tujuan</span>
+                <span>${loan.purpose}</span>
+              </div>
+            </div>
+
+            <button type="button"
+                    onclick="markReturned('${id}')"
+                    class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg">
+              Tandakan Pulang
+            </button>
+          `;
+          activeList.appendChild(card);
+        }
+
+        // ----- Jadual Rekod Pinjaman -----
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-gray-50 text-[11px]";
+        tr.innerHTML = `
+          <td class="px-4 py-3 whitespace-nowrap">${loan.guruName}</td>
+          <td class="px-4 py-3 whitespace-nowrap">${loan.ic}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            ${Object.values(loan.items || {}).map(i => `${i.quantity} x ${i.name}`).join("<br>")}
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            ${formatDate(loan.startDate)} - ${formatDate(loan.endDate)}
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">${loan.purpose}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-semibold
+                         ${loan.isReturned ? 'bg-gray-200 text-gray-700' : 'bg-emerald-100 text-emerald-700'}">
+              ${loan.isReturned ? 'Dipulangkan' : 'Diluluskan'}
+            </span>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            ${loan.isReturned
+              ? '<span class="text-gray-400 text-[10px]">Selesai</span>'
+              : `<button type="button"
+                         onclick="markReturned('${id}')"
+                         class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded">
+                   Pulang
+                 </button>`
+            }
+          </td>
+        `;
+        recordBody.appendChild(tr);
+      });
+
+      summaryActive.textContent = activeCount
+        ? `${activeCount} aset sedang dipinjam`
+        : "";
+
+      noActive.classList.toggle("hidden", activeCount > 0);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("ms-MY");
+    }
+
+    // Untuk dipanggil dari HTML
+    function markReturned(loanId) {
+      const loan = loansCache[loanId];
+      if (!loan || loan.isReturned) return;
+      if (!confirm("Tandakan semua aset dalam pinjaman ini telah dipulangkan?")) return;
+
+      const updates = {};
+
+      // pulangkan stok
+      Object.entries(loan.items || {}).forEach(([id, item]) => {
+        const asset = assetsCache[id];
+        if (!asset) return;
+        const available = asset.available ?? 0;
+        updates["assets/" + id + "/available"] = available + item.quantity;
+      });
+
+      updates["loans/" + loanId + "/isReturned"] = true;
+      updates["loans/" + loanId + "/status"] = "Dipulangkan";
+      updates["loans/" + loanId + "/returnedAt"] = new Date().toISOString();
+
+      db.ref().update(updates).catch(console.error);
+    }
+    window.markReturned = markReturned;
+
+    // Kosongkan rekod lama (yang sudah dipulangkan)
+    document.getElementById("clearRecordsBtn").addEventListener("click", () => {
+      if (!confirm("Padam semua rekod yang telah dipulangkan?")) return;
+      const updates = {};
+      Object.entries(loansCache).forEach(([id, loan]) => {
+        if (loan.isReturned) {
+          updates["loans/" + id] = null;
+        }
+      });
+      if (Object.keys(updates).length === 0) {
+        alert("Tiada rekod dipulangkan untuk dipadam.");
+        return;
+      }
+      db.ref().update(updates).then(() => {
+        alert("Rekod lama berjaya dikosongkan.");
+      }).catch(console.error);
+    });
+
+    // =========================
+    // 7. Admin Login (ringkas)
+    // =========================
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+    const adminLoginText = document.getElementById("adminLoginText");
+    const tabRekodPinjaman = document.getElementById("tabRekodPinjaman");
+    const appTitle = document.getElementById("appTitle");
+
+    adminLoginBtn.addEventListener("click", () => {
+      if (!isAdmin) {
+        const pwd = prompt("Masukkan kata laluan admin:");
+        // boleh tukar password ikut suka
+        if (pwd === "admin123") {
+          isAdmin = true;
+          adminLoginText.textContent = "Log Keluar";
+          tabRekodPinjaman.classList.remove("hidden");
+          appTitle.textContent = "Dashboard Admin • Sistem Pinjaman Aset ICT";
+          alert("Selamat datang, Admin.");
+        } else if (pwd !== null) {
+          alert("Kata laluan salah.");
+        }
+      } else {
+        isAdmin = false;
+        adminLoginText.textContent = "Log Masuk Admin";
+        tabRekodPinjaman.classList.add("hidden");
+        appTitle.textContent = "Sistem Pinjaman Aset ICT";
+        showPage("permohonan");
+      }
+    });
+
+    // Mula-mula tunjuk Permohonan
+    showPage("permohonan");
+  </script>
+</body>
+</html>
