@@ -20,7 +20,7 @@
   <header class="bg-white shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between py-3 px-4">
       <div class="flex items-center gap-3">
-        <!-- LOGO BARU SKSA -->
+        <!-- LOGO SKSA -->
         <img src="https://i.imgur.com/wpfWEN4.png" alt="Logo SK Sri Aman" class="w-10 h-10 rounded-full border" />
         <div>
           <h1 id="appTitle" class="font-bold text-lg text-gray-900">Sistem Pinjaman Aset ICT</h1>
@@ -52,9 +52,12 @@
   <!-- MAIN CONTENT -->
   <main class="max-w-7xl mx-auto py-8 px-4 space-y-8">
 
-    <!-- PERMOHONAN -->
+    <!-- ================= PERMOHONAN ================= -->
     <section id="page-permohonan" class="page-section">
-      <div class="grid grid-cols-1 lg:grid-cols-[340px,minmax(0,1fr)] gap-6 items-start">
+
+      <!-- VIEW GURU (BUKAN ADMIN) -->
+      <div id="permohonan-user-view"
+           class="grid grid-cols-1 lg:grid-cols-[340px,minmax(0,1fr)] gap-6 items-start">
         <!-- FORM -->
         <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
           <h2 class="font-semibold text-lg mb-1 text-gray-900">Borang Permohonan Pinjaman</h2>
@@ -140,9 +143,29 @@
           </div>
         </div>
       </div>
+
+      <!-- VIEW ADMIN (PERMOHONAN MENUNGGU KELULUSAN) -->
+      <div id="permohonan-admin-view" class="hidden">
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-semibold text-lg text-gray-900">
+              Permohonan Menunggu Kelulusan (Admin)
+            </h2>
+            <p id="pendingSummary" class="text-xs text-gray-500"></p>
+          </div>
+          <p class="text-xs text-gray-500 mb-4">
+            Admin hanya meluluskan / menolak permohonan. Untuk meminjam aset, sila log keluar admin.
+          </p>
+
+          <div id="pendingRequestList" class="space-y-4"></div>
+          <p id="noPendingRequests" class="text-sm text-gray-400 hidden">
+            Tiada permohonan baharu buat masa ini.
+          </p>
+        </div>
+      </div>
     </section>
 
-    <!-- ASET TERSEDIA -->
+    <!-- ================= ASET TERSEDIA ================= -->
     <section id="page-aset-tersedia" class="page-section hidden">
       <h2 class="font-semibold text-lg mb-4 text-gray-900">Aset Tersedia</h2>
 
@@ -217,7 +240,7 @@
       <div id="assetAvailableList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>
 
-    <!-- ASET DIPINJAM (AKTIF) -->
+    <!-- ================= ASET DIPINJAM ================= -->
     <section id="page-aset-dipinjam" class="page-section hidden">
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-lg text-gray-900">Aset Sedang Dipinjam</h2>
@@ -227,7 +250,7 @@
       <p id="noActiveLoans" class="text-sm text-gray-500 hidden">Tiada aset sedang dipinjam.</p>
     </section>
 
-    <!-- REKOD PINJAMAN (ADMIN) -->
+    <!-- ================= REKOD PINJAMAN ================= -->
     <section id="page-rekod-pinjaman" class="page-section hidden">
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-semibold text-lg text-gray-900">Semua Rekod Pinjaman</h2>
@@ -269,7 +292,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 
   <script>
-    // 1. Firebase Config
+    // ================== FIREBASE CONFIG ==================
     const firebaseConfig = {
       apiKey: "AIzaSyCV5skKQO1i-T6pOckTEyhDG8H4fh7vS7s",
       authDomain: "sistem-pinjaman-aset-ict-v2.firebaseapp.com",
@@ -284,7 +307,45 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. Seed data aset
+    // ================== STATE & REFS ==================
+    const assetsRef = db.ref("assets");
+    const loansRef = db.ref("loans");
+
+    let assetsCache = {};
+    let loansCache = {};
+    let selectedQuantities = {};
+    let isAdmin = false;
+
+    // DOM refs
+    const assetChoiceListEl = document.getElementById("assetChoiceList");
+    const assetAvailableListEl = document.getElementById("assetAvailableList");
+    const loanActiveListEl = document.getElementById("loanActiveList");
+    const noActiveLoansEl = document.getElementById("noActiveLoans");
+    const summaryActiveLoansEl = document.getElementById("summaryActiveLoans");
+    const loanRecordTableBodyEl = document.getElementById("loanRecordTableBody");
+    const pendingRequestListEl = document.getElementById("pendingRequestList");
+    const pendingSummaryEl = document.getElementById("pendingSummary");
+    const noPendingRequestsEl = document.getElementById("noPendingRequests");
+    const adminAssetPanelEl = document.getElementById("adminAssetPanel");
+    const permohonanUserViewEl = document.getElementById("permohonan-user-view");
+    const permohonanAdminViewEl = document.getElementById("permohonan-admin-view");
+
+    const loanFormEl = document.getElementById("loanForm");
+
+    // Admin asset form refs
+    const assetForm = document.getElementById("assetForm");
+    const assetIdField = document.getElementById("assetIdField");
+    const assetNameField = document.getElementById("assetName");
+    const assetCategoryField = document.getElementById("assetCategory");
+    const assetImageField = document.getElementById("assetImageUrl");
+    const assetTotalField = document.getElementById("assetTotal");
+    const assetAvailableField = document.getElementById("assetAvailable");
+    const assetSpecsField = document.getElementById("assetSpecs");
+    const assetFormTitle = document.getElementById("adminAssetFormTitle");
+    const assetFormResetBtn = document.getElementById("resetAssetFormBtn");
+    let currentEditAssetId = null;
+
+    // Seed aset default jika tiada
     const defaultAssets = {
       joi_chromebook_c100: {
         name: "LAPTOP JOI CHROMEBOOK C100",
@@ -373,47 +434,13 @@
       }
     };
 
-    let assetsCache = {};
-    let loansCache = {};
-    let selectedQuantities = {};
-    let isAdmin = false;
-
-    const assetsRef = db.ref("assets");
-    const loansRef = db.ref("loans");
-
-    // DOM refs untuk admin asset form
-    const assetForm = document.getElementById("assetForm");
-    const assetIdField = document.getElementById("assetIdField");
-    const assetNameField = document.getElementById("assetName");
-    const assetCategoryField = document.getElementById("assetCategory");
-    const assetImageField = document.getElementById("assetImageUrl");
-    const assetTotalField = document.getElementById("assetTotal");
-    const assetAvailableField = document.getElementById("assetAvailable");
-    const assetSpecsField = document.getElementById("assetSpecs");
-    const assetFormTitle = document.getElementById("adminAssetFormTitle");
-    const assetFormResetBtn = document.getElementById("resetAssetFormBtn");
-    let currentEditAssetId = null;
-
-    // Seed assets jika kosong
     assetsRef.once("value").then((snap) => {
       if (!snap.exists()) {
         assetsRef.set(defaultAssets);
       }
     });
 
-    // Listener aset
-    assetsRef.on("value", (snap) => {
-      assetsCache = snap.val() || {};
-      renderAssets();
-    });
-
-    // Listener loans
-    loansRef.on("value", (snap) => {
-      loansCache = snap.val() || {};
-      renderLoans();
-    });
-
-    // Helper spesifikasi
+    // ================== HELPERS ==================
     function textareaToSpecs(text) {
       const specs = {};
       text.split("\n").forEach(line => {
@@ -434,7 +461,22 @@
         .join("\n");
     }
 
-    // Tabs
+    function renderSpecRows(specsObj) {
+      if (!specsObj) return '<span class="col-span-2 text-gray-400">Tiada spesifikasi direkodkan.</span>';
+      return Object.entries(specsObj).map(([k, v]) => `
+        <div class="text-gray-500">${k}</div>
+        <div class="text-gray-800 font-medium">${v}</div>
+      `).join("");
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("ms-MY");
+    }
+
+    // ================== TAB NAV ==================
     const tabButtons = document.querySelectorAll("[data-page]");
     const sections = {
       "permohonan": document.getElementById("page-permohonan"),
@@ -458,21 +500,19 @@
       btn.addEventListener("click", () => showPage(btn.dataset.page));
     });
 
-    // Render aset
+    // ================== RENDER ASET ==================
     function renderAssets() {
-      const choiceList = document.getElementById("assetChoiceList");
-      const availList = document.getElementById("assetAvailableList");
-      if (!choiceList || !availList) return;
+      if (!assetChoiceListEl || !assetAvailableListEl) return;
 
-      choiceList.innerHTML = "";
-      availList.innerHTML = "";
+      assetChoiceListEl.innerHTML = "";
+      assetAvailableListEl.innerHTML = "";
 
       Object.entries(assetsCache).forEach(([id, asset]) => {
         const available = asset.available ?? 0;
         const total = asset.total ?? available;
         const current = selectedQuantities[id] || 0;
 
-        // Kad untuk pilih aset (permohonan)
+        // Kad untuk pilih aset (guru)
         const cardChoice = document.createElement("div");
         cardChoice.className =
           "bg-white rounded-3xl shadow-md border border-gray-100 p-5 flex flex-col items-center text-center transition hover:shadow-xl";
@@ -520,7 +560,7 @@
             ${renderSpecRows(asset.specs)}
           </div>
         `;
-        choiceList.appendChild(cardChoice);
+        assetChoiceListEl.appendChild(cardChoice);
 
         // Kad untuk Aset Tersedia
         const cardAvail = document.createElement("div");
@@ -577,16 +617,8 @@
           </div>
           ` : ``}
         `;
-        availList.appendChild(cardAvail);
+        assetAvailableListEl.appendChild(cardAvail);
       });
-    }
-
-    function renderSpecRows(specsObj) {
-      if (!specsObj) return '<span class="col-span-2 text-gray-400">Tiada spesifikasi direkodkan.</span>';
-      return Object.entries(specsObj).map(([k, v]) => `
-        <div class="text-gray-500">${k}</div>
-        <div class="text-gray-800 font-medium">${v}</div>
-      `).join("");
     }
 
     function changeAssetQuantity(id, delta, maxAvailable) {
@@ -607,105 +639,18 @@
     }
     window.toggleSpec = toggleSpec;
 
-    // Hantar permohonan
-    document.getElementById("loanForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const namaGuru = document.getElementById("namaGuru").value.trim();
-      const noIC = document.getElementById("noIC").value.trim();
-      const tarikhPinjam = document.getElementById("tarikhPinjam").value;
-      const tarikhPulang = document.getElementById("tarikhPulang").value;
-      const tujuan = document.getElementById("tujuan").value.trim();
-
-      const selectedItems = {};
-      let totalUnit = 0;
-
-      Object.entries(selectedQuantities).forEach(([id, qty]) => {
-        if (qty > 0 && assetsCache[id]) {
-          selectedItems[id] = {
-            name: assetsCache[id].name,
-            quantity: qty
-          };
-          totalUnit += qty;
-        }
-      });
-
-      if (!totalUnit) {
-        alert("Sila pilih sekurang-kurangnya satu aset untuk dipinjam.");
-        return;
-      }
-      if (!namaGuru || !noIC || !tarikhPinjam || !tarikhPulang || !tujuan) {
-        alert("Sila lengkapkan semua maklumat borang.");
-        return;
-      }
-      if (tarikhPulang < tarikhPinjam) {
-        alert("Tarikh pulang tidak boleh lebih awal daripada tarikh pinjam.");
-        return;
-      }
-
-      for (const [id, item] of Object.entries(selectedItems)) {
-        const asset = assetsCache[id];
-        const available = asset.available ?? 0;
-        if (item.quantity > available) {
-          alert(`Stok untuk "${asset.name}" tidak mencukupi.`);
-          return;
-        }
-      }
-
-      if (!confirm("Hantar permohonan pinjaman aset?")) return;
-
-      const newLoanRef = loansRef.push();
-      const loanId = newLoanRef.key;
-
-      const loanData = {
-        id: loanId,
-        guruName: namaGuru,
-        ic: noIC,
-        startDate: tarikhPinjam,
-        endDate: tarikhPulang,
-        purpose: tujuan,
-        items: selectedItems,
-        status: "Diluluskan",
-        isReturned: false,
-        createdAt: new Date().toISOString()
-      };
-
-      const updates = {};
-      updates["loans/" + loanId] = loanData;
-      Object.entries(selectedItems).forEach(([id, item]) => {
-        const asset = assetsCache[id];
-        const available = asset.available ?? 0;
-        updates["assets/" + id + "/available"] = available - item.quantity;
-      });
-
-      db.ref().update(updates)
-        .then(() => {
-          alert("Permohonan dihantar & diluluskan.");
-          document.getElementById("loanForm").reset();
-          selectedQuantities = {};
-          renderAssets();
-          showPage("aset-dipinjam");
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("Ralat semasa menyimpan permohonan. Sila cuba lagi.");
-        });
-    });
-
-    // Render loans
+    // ================== RENDER LOANS ==================
     function renderLoans() {
-      const activeList = document.getElementById("loanActiveList");
-      const recordBody = document.getElementById("loanRecordTableBody");
-      const summaryActive = document.getElementById("summaryActiveLoans");
-      const noActive = document.getElementById("noActiveLoans");
+      if (!loanActiveListEl || !loanRecordTableBodyEl) return;
 
-      if (!activeList || !recordBody || !summaryActive || !noActive) return;
+      loanActiveListEl.innerHTML = "";
+      loanRecordTableBodyEl.innerHTML = "";
+      if (pendingRequestListEl) pendingRequestListEl.innerHTML = "";
 
-      activeList.innerHTML = "";
-      recordBody.innerHTML = "";
+      let activeCount = 0;
+      let pendingCount = 0;
 
       const now = new Date();
-      let activeCount = 0;
 
       Object.entries(loansCache).forEach(([id, loan]) => {
         const end = new Date(loan.endDate);
@@ -716,7 +661,56 @@
           .map(i => `${i.quantity} x ${i.name}`)
           .join(", ");
 
-        if (!loan.isReturned) {
+        // PENDING - hanya untuk admin view
+        if (loan.status === "Menunggu Kelulusan" && !loan.isReturned) {
+          pendingCount++;
+          if (pendingRequestListEl) {
+            const card = document.createElement("div");
+            card.className = "bg-white rounded-3xl shadow-md border border-gray-100 p-5";
+            card.innerHTML = `
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                  <span>👤</span><span>${loan.guruName}</span>
+                </div>
+                <span class="text-[11px] px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-semibold">
+                  Menunggu Kelulusan
+                </span>
+              </div>
+
+              <div class="text-xs text-gray-700 space-y-1 mb-3">
+                <div class="flex justify-between gap-2">
+                  <span class="font-semibold">Aset Dipohon</span>
+                  <span class="text-right">${itemListText}</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <span class="font-semibold">Tarikh</span>
+                  <span class="text-right">${formatDate(loan.startDate)} - ${formatDate(loan.endDate)}</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <span class="font-semibold">Tujuan</span>
+                  <span class="text-right">${loan.purpose}</span>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button type="button"
+                        onclick="approveLoan('${id}')"
+                        class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-full shadow">
+                  Luluskan
+                </button>
+                <button type="button"
+                        onclick="rejectLoan('${id}')"
+                        class="text-xs bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full shadow">
+                  Tolak
+                </button>
+              </div>
+            `;
+            pendingRequestListEl.appendChild(card);
+          }
+        }
+
+        // ACTIVE (Diluluskan & belum dipulangkan)
+        if (loan.status === "Diluluskan" && !loan.isReturned) {
           activeCount++;
 
           const card = document.createElement("div");
@@ -763,7 +757,47 @@
               Tandakan Pulang
             </button>
           `;
-          activeList.appendChild(card);
+          loanActiveListEl.appendChild(card);
+        }
+
+        // Rekod Pinjaman (semua status)
+        let statusClass = "bg-gray-100 text-gray-700";
+        let statusLabel = loan.status || "Tidak Diketahui";
+        if (loan.status === "Menunggu Kelulusan") {
+          statusClass = "bg-yellow-100 text-yellow-800";
+        } else if (loan.status === "Diluluskan" && !loan.isReturned) {
+          statusClass = "bg-emerald-100 text-emerald-700";
+        } else if (loan.status === "Ditolak") {
+          statusClass = "bg-red-100 text-red-700";
+        } else if (loan.status === "Dipulangkan" || loan.isReturned) {
+          statusClass = "bg-gray-200 text-gray-700";
+          statusLabel = "Dipulangkan";
+        }
+
+        let actionHtml = "";
+        if (loan.status === "Menunggu Kelulusan" && !loan.isReturned) {
+          actionHtml = `
+            <button type="button"
+                    onclick="approveLoan('${id}')"
+                    class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full mr-1">
+              Lulus
+            </button>
+            <button type="button"
+                    onclick="rejectLoan('${id}')"
+                    class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full">
+              Tolak
+            </button>
+          `;
+        } else if (loan.status === "Diluluskan" && !loan.isReturned) {
+          actionHtml = `
+            <button type="button"
+                    onclick="markReturned('${id}')"
+                    class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full">
+              Pulang
+            </button>
+          `;
+        } else {
+          actionHtml = '<span class="text-gray-400 text-[10px]">Tiada Aksi</span>';
         }
 
         const tr = document.createElement("tr");
@@ -779,42 +813,44 @@
           </td>
           <td class="px-4 py-3 whitespace-nowrap">${loan.purpose}</td>
           <td class="px-4 py-3 whitespace-nowrap">
-            <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-semibold
-                         ${loan.isReturned ? 'bg-gray-200 text-gray-700' : 'bg-emerald-100 text-emerald-700'}">
-              ${loan.isReturned ? 'Dipulangkan' : 'Diluluskan'}
+            <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-semibold ${statusClass}">
+              ${statusLabel}
             </span>
           </td>
           <td class="px-4 py-3 whitespace-nowrap">
-            ${loan.isReturned
-              ? '<span class="text-gray-400 text-[10px]">Selesai</span>'
-              : `<button type="button"
-                         onclick="markReturned('${id}')"
-                         class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-full">
-                   Pulang
-                 </button>`
-            }
+            ${actionHtml}
           </td>
         `;
-        recordBody.appendChild(tr);
+        loanRecordTableBodyEl.appendChild(tr);
       });
 
-      summaryActive.textContent = activeCount
-        ? `${activeCount} aset sedang dipinjam`
-        : "";
-
-      noActive.classList.toggle("hidden", activeCount > 0);
+      // ringkasan
+      if (summaryActiveLoansEl) {
+        summaryActiveLoansEl.textContent = activeCount
+          ? `${activeCount} pinjaman aktif`
+          : "";
+      }
+      if (noActiveLoansEl) {
+        noActiveLoansEl.classList.toggle("hidden", activeCount > 0);
+      }
+      if (pendingSummaryEl) {
+        pendingSummaryEl.textContent = pendingCount
+          ? `${pendingCount} permohonan menunggu kelulusan`
+          : "";
+      }
+      if (noPendingRequestsEl) {
+        noPendingRequestsEl.classList.toggle("hidden", pendingCount > 0);
+      }
     }
 
-    function formatDate(dateStr) {
-      if (!dateStr) return "";
-      const d = new Date(dateStr);
-      if (Number.isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString("ms-MY");
-    }
-
+    // ================== LOAN ACTIONS ==================
     function markReturned(loanId) {
       const loan = loansCache[loanId];
-      if (!loan || loan.isReturned) return;
+      if (!loan) return;
+      if (loan.status !== "Diluluskan" || loan.isReturned) {
+        alert("Pinjaman ini belum diluluskan atau sudah dipulangkan.");
+        return;
+      }
       if (!confirm("Tandakan semua aset dalam pinjaman ini telah dipulangkan?")) return;
 
       const updates = {};
@@ -834,6 +870,151 @@
     }
     window.markReturned = markReturned;
 
+    function approveLoan(loanId) {
+      if (!isAdmin) {
+        alert("Hanya admin boleh meluluskan permohonan.");
+        return;
+      }
+      const loan = loansCache[loanId];
+      if (!loan) return;
+      if (loan.status !== "Menunggu Kelulusan") {
+        alert("Permohonan ini sudah diproses.");
+        return;
+      }
+
+      // Semak stok mencukupi
+      for (const [id, item] of Object.entries(loan.items || {})) {
+        const asset = assetsCache[id];
+        if (!asset) {
+          alert(`Aset "${item.name}" tidak wujud dalam senarai.`);
+          return;
+        }
+        const available = asset.available ?? 0;
+        if (item.quantity > available) {
+          alert(`Stok tidak mencukupi untuk "${asset.name}". Tersedia: ${available} unit.`);
+          return;
+        }
+      }
+
+      if (!confirm("Luluskan permohonan ini? Stok akan ditolak.")) return;
+
+      const updates = {};
+      Object.entries(loan.items || {}).forEach(([id, item]) => {
+        const asset = assetsCache[id];
+        const available = asset.available ?? 0;
+        updates["assets/" + id + "/available"] = available - item.quantity;
+      });
+      updates["loans/" + loanId + "/status"] = "Diluluskan";
+      updates["loans/" + loanId + "/approvedAt"] = new Date().toISOString();
+
+      db.ref().update(updates).catch(console.error);
+    }
+    window.approveLoan = approveLoan;
+
+    function rejectLoan(loanId) {
+      if (!isAdmin) {
+        alert("Hanya admin boleh menolak permohonan.");
+        return;
+      }
+      const loan = loansCache[loanId];
+      if (!loan) return;
+      if (loan.status !== "Menunggu Kelulusan") {
+        alert("Permohonan ini sudah diproses.");
+        return;
+      }
+      if (!confirm("Tolak permohonan ini?")) return;
+
+      const updates = {};
+      updates["loans/" + loanId + "/status"] = "Ditolak";
+      updates["loans/" + loanId + "/rejectedAt"] = new Date().toISOString();
+      db.ref().update(updates).catch(console.error);
+    }
+    window.rejectLoan = rejectLoan;
+
+    // ================== LISTENERS FIREBASE ==================
+    assetsRef.on("value", (snap) => {
+      assetsCache = snap.val() || {};
+      renderAssets();
+    });
+
+    loansRef.on("value", (snap) => {
+      loansCache = snap.val() || {};
+      renderLoans();
+    });
+
+    // ================== HANTAR PERMOHONAN (GURU) ==================
+    loanFormEl.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      if (isAdmin) {
+        alert("Admin tidak boleh menghantar permohonan. Sila log keluar admin jika mahu meminjam.");
+        return;
+      }
+
+      const namaGuru = document.getElementById("namaGuru").value.trim();
+      const noIC = document.getElementById("noIC").value.trim();
+      const tarikhPinjam = document.getElementById("tarikhPinjam").value;
+      const tarikhPulang = document.getElementById("tarikhPulang").value;
+      const tujuan = document.getElementById("tujuan").value.trim();
+
+      const selectedItems = {};
+      let totalUnit = 0;
+
+      Object.entries(selectedQuantities).forEach(([id, qty]) => {
+        if (qty > 0 && assetsCache[id]) {
+          selectedItems[id] = {
+            name: assetsCache[id].name,
+            quantity: qty
+          };
+          totalUnit += qty;
+        }
+      });
+
+      if (!totalUnit) {
+        alert("Sila pilih sekurang-kurangnya satu aset untuk dipinjam.");
+        return;
+      }
+      if (!namaGuru || !noIC || !tarikhPinjam || !tarikhPulang || !tujuan) {
+        alert("Sila lengkapkan semua maklumat borang.");
+        return;
+      }
+      if (tarikhPulang < tarikhPinjam) {
+        alert("Tarikh pulang tidak boleh lebih awal daripada tarikh pinjam.");
+        return;
+      }
+
+      if (!confirm("Hantar permohonan pinjaman aset untuk kelulusan admin?")) return;
+
+      const newLoanRef = loansRef.push();
+      const loanId = newLoanRef.key;
+
+      const loanData = {
+        id: loanId,
+        guruName: namaGuru,
+        ic: noIC,
+        startDate: tarikhPinjam,
+        endDate: tarikhPulang,
+        purpose: tujuan,
+        items: selectedItems,
+        status: "Menunggu Kelulusan",
+        isReturned: false,
+        createdAt: new Date().toISOString()
+      };
+
+      newLoanRef.set(loanData)
+        .then(() => {
+          alert("Permohonan dihantar. Sila tunggu kelulusan admin.");
+          loanFormEl.reset();
+          selectedQuantities = {};
+          renderAssets();
+        })
+        .catch((err) => {
+          console.error(err);
+          alert("Ralat semasa menyimpan permohonan. Sila cuba lagi.");
+        });
+    });
+
+    // ================== CLEAR REKOD DIPULANGKAN ==================
     document.getElementById("clearRecordsBtn").addEventListener("click", () => {
       if (!confirm("Padam semua rekod yang telah dipulangkan?")) return;
       const updates = {};
@@ -849,7 +1030,7 @@
       }).catch(console.error);
     });
 
-    // Admin aset
+    // ================== ADMIN: ASSET FORM ==================
     function resetAssetForm() {
       if (!assetForm) return;
       currentEditAssetId = null;
@@ -931,8 +1112,7 @@
       assetSpecsField.value = specsToTextarea(asset.specs);
       assetFormTitle.textContent = "Edit Aset";
 
-      const panel = document.getElementById("adminAssetPanel");
-      if (panel) panel.scrollIntoView({ behavior: "smooth" });
+      if (adminAssetPanelEl) adminAssetPanelEl.scrollIntoView({ behavior: "smooth" });
     }
     window.startEditAsset = startEditAsset;
 
@@ -954,12 +1134,18 @@
     window.deleteAsset = deleteAsset;
 
     function updateAdminUI() {
-      const panel = document.getElementById("adminAssetPanel");
-      if (panel) panel.classList.toggle("hidden", !isAdmin);
+      if (adminAssetPanelEl) {
+        adminAssetPanelEl.classList.toggle("hidden", !isAdmin);
+      }
+      if (permohonanUserViewEl && permohonanAdminViewEl) {
+        permohonanUserViewEl.classList.toggle("hidden", isAdmin);
+        permohonanAdminViewEl.classList.toggle("hidden", !isAdmin);
+      }
       renderAssets();
+      renderLoans();
     }
 
-    // Admin login
+    // ================== ADMIN LOGIN ==================
     const adminLoginBtn = document.getElementById("adminLoginBtn");
     const adminLoginText = document.getElementById("adminLoginText");
     const tabRekodPinjaman = document.getElementById("tabRekodPinjaman");
@@ -972,7 +1158,7 @@
           isAdmin = true;
           adminLoginText.textContent = "Log Keluar";
           tabRekodPinjaman.classList.remove("hidden");
-          appTitle.textContent = "Dashboard Admin • Sistem Pinjaman Aset ICT";
+          appTitle.textContent = "Dashboard Admin · Sistem Pinjaman Aset ICT";
           alert("Selamat datang, Admin.");
           updateAdminUI();
         } else if (pwd !== null) {
@@ -989,7 +1175,7 @@
       }
     });
 
-    // Mula-mula
+    // ================== INIT ==================
     showPage("permohonan");
   </script>
 </body>
